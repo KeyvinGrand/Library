@@ -1,70 +1,89 @@
 <?php
-include 'db_connect.php';
-?>
 
+require 'db_connect.php';
+
+$loginError = "";
+
+// already logged in, go straight to menu
+if (isset($_SESSION['username'])) {
+    header("Location: library_menu.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if ($username === '' || $password === '') {
+        $loginError = "Please enter username and password.";
+    } else {
+
+        $q = $pdo->prepare("SELECT username, password FROM users WHERE username = ?");
+        $q->execute([$username]);
+        $user = $q->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            // TEMP DEBUG – to see what comes back
+            // echo '<pre>'; var_dump($user); echo '</pre>'; exit;
+
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['username'] = $user['username'];
+                header("Location: library_menu.php");
+                exit();
+            } else {
+                $loginError = "Incorrect username or password.";
+            }
+        } else {
+            $loginError = "Incorrect username or password.";
+        }
+    }
+}
+
+$registered = isset($_GET['registered']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEFo
-    rCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
-
-
+    <title>Library Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Library System</a>
-    <div>
-      <a href="index.php" class="btn btn-light btn-sm me-2 disabled">Home</a>
-      <a href="search.php" class="btn btn-light btn-sm">Browse</a>
-      <a href="logout.php" class="btn btn-outline-light btn-sm">Logout</a>
-    </div>
-  </div>
-</nav>
+<div class="container" style="max-width: 500px; margin-top: 80px;">
 
-<!-- MAIN CONTENT -->
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-secondary text-white">
-            <h4>Login</h4>
+    <h2 class="mb-4 text-center">Library Login</h2>
+
+    <?php if ($registered) { ?>
+        <div class="alert alert-success">
+            Registration successful. You can log in now.
         </div>
-        <div class="card-body">
-            <form method="POST" action="index.php">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input 
-                      type="text" 
-                      class="form-control" 
-                      id="username" 
-                      name="username" 
-                      placeholder="Enter username" 
-                      required
-                    >
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input 
-                      type="password" 
-                      class="form-control" 
-                      id="password" 
-                      name="password" 
-                      placeholder="Enter password" 
-                      required
-                    >
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+    <?php } ?>
+
+    <?php if (!empty($loginError)) { ?>
+        <div class="alert alert-danger">
+            <?php echo htmlspecialchars($loginError); ?>
         </div>
-        <div class="card-footer text-center">
-            <small>Don't have an account? <a href="register.php">Register here</a></small>
+    <?php } ?>
+
+    <form method="POST" action="index.php">
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control">
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+
+    <p class="mt-3 text-center">
+        No account? <a href="register.php">Register here</a>
+    </p>
 </div>
 
 </body>
