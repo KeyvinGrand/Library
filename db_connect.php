@@ -1,4 +1,8 @@
 <?php
+/*
+Program description: Database connection setup
+Author: Keyvin Grand
+*/
 
 $dsn = 'mysql:host=localhost;dbname=librarydb;charset=utf8mb4';
 $username = 'root';

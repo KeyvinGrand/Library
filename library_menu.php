@@ -1,9 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+/*
+Program description: Library main menu after user logs in, access to search and reserving books, view reserved books
+Author: Keyvin Grand
+*/
 
-
-session_start();
+include 'header.php';
 
 // block access if not logged in
 if (!isset($_SESSION['username'])) {
@@ -22,16 +23,6 @@ $username = $_SESSION['username'];
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand">Library System</span>
-        <span class="navbar-text">
-            Logged in as <?php echo htmlspecialchars($username); ?> |
-            <a href="logout.php" class="text-decoration-none text-light">Logout</a>
-        </span>
-    </div>
-</nav>
-
 <div class="container mt-5" style="max-width: 600px;">
 
     <h2 class="mb-4">Library Menu</h2>
@@ -42,9 +33,6 @@ $username = $_SESSION['username'];
         </a>
         <a href="my_reservations.php" class="list-group-item list-group-item-action">
             View My Reserved Books
-        </a>
-        <a href="#" class="list-group-item list-group-item-action disabled">
-            Reserve a Book (via search page)
         </a>
     </div>
 

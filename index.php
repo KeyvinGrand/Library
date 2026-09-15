@@ -1,5 +1,10 @@
 <?php
+/*
+Program description: User login page, access to registration page
+Author: Keyvin Grand
+*/
 
+session_start();
 require 'db_connect.php';
 
 $loginError = "";
@@ -19,14 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $loginError = "Please enter username and password.";
     } else {
 
+        //fetch user from database
         $q = $pdo->prepare("SELECT username, password FROM users WHERE username = ?");
         $q->execute([$username]);
         $user = $q->fetch(PDO::FETCH_ASSOC);
 
+        //checks user and password in database and set session
         if ($user) {
-            // TEMP DEBUG – to see what comes back
-            // echo '<pre>'; var_dump($user); echo '</pre>'; exit;
-
             if (password_verify($password, $user['password'])) {
                 $_SESSION['username'] = $user['username'];
                 header("Location: library_menu.php");
